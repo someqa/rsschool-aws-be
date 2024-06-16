@@ -1,4 +1,4 @@
-[
+export const products = [
     {
         "description": "Belle's electro-rifle deals damage to enemies and her Super electrocutes the target, causing them to take extra damage.",
         "id": "1234",

@@ -1,4 +1,4 @@
-import products from "./products.json";
+import { products } from "./products";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
 export async function handler(event: APIGatewayProxyEvent) {
@@ -10,7 +10,9 @@ export async function handler(event: APIGatewayProxyEvent) {
     if (!product) {
         return {
             statusCode: 404,
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET"
+            },
             body: JSON.stringify({ message: "Product not found" })
         };
     }
