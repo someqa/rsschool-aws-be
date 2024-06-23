@@ -5,7 +5,6 @@ export async function handler() {
     const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
     const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
     try {
-        if (!productsTableName || !stocksTableName) throw new Error("[ERROR: pls, make sure all the table names are passed to products list handler")
         const db = DynamoDBDocument.from(new DynamoDB());
         const { Items: products } = await db.scan({
             TableName: productsTableName
