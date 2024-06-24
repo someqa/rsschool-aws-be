@@ -14,7 +14,7 @@ export class CreateProduct extends Construct {
         this.createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
             runtime: lambda.Runtime.NODEJS_20_X,
             code: lambda.Code.fromAsset(lambdaFuncDir),
-            handler: 'create_product.handler',
+            handler: 'add_product.handler',
             environment: {
                 PRODUCTS_TABLE_NAME: productsTable.tableName,
                 STOCKS_TABLE_NAME: stocksTable.tableName

@@ -5,6 +5,7 @@ export async function handler() {
     const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
     const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
     try {
+        console.log("Incoming request for Products_List Handler:", JSON.stringify(event));
         const db = DynamoDBDocument.from(new DynamoDB());
         const { Items: products } = await db.scan({
             TableName: productsTableName
