@@ -17,7 +17,7 @@ function validateProductSimply(product: any): boolean {
 export async function handler(event: APIGatewayProxyEvent) {
     const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "*" };
     try {
-        console.log("Incoming request for AddProduct Handler:", JSON.stringify(event));
+        console.log("Incoming request for AddProduct Handler:", JSON.stringify(event, null, 2));
         if (!event.body) {
             return { statusCode: 400, headers, body: 'invalid request, you are missing the parameter body' };
         }

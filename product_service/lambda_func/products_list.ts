@@ -1,11 +1,12 @@
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
+import { APIGatewayProxyEvent } from "aws-lambda";
 
-export async function handler() {
+export async function handler(event: APIGatewayProxyEvent) {
     const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
     const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
     try {
-        console.log("Incoming request for Products_List Handler:", JSON.stringify(event));
+        console.log("Incoming request for Products_List Handler:", JSON.stringify(event, null, 2));
         const db = DynamoDBDocument.from(new DynamoDB());
         const { Items: products } = await db.scan({
             TableName: productsTableName

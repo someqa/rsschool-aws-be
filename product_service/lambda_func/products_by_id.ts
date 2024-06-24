@@ -4,7 +4,7 @@ import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
 export async function handler(event: APIGatewayProxyEvent) {
     try {
-        console.log("Incoming request for ProductById Handler:", JSON.stringify(event));
+        console.log("Incoming request for ProductById Handler:", JSON.stringify(event, null, 2));
         const productId = event.pathParameters?.productId;
         const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
         const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
