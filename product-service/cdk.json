@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/rsschool-aws-be.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/rsschool-aws-be-app.ts",
   "watch": {
     "include": [
       "**"
