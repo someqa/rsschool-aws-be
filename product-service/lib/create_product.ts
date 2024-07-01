@@ -8,7 +8,7 @@ export class CreateProduct extends Construct {
     public createProductFunction: lambda.Function;
     constructor(stack: Stack, constructId: string) {
         super(stack, constructId);
-        const lambdaFuncDir = path.join(__dirname, '../product_service/lambda_func');
+        const lambdaFuncDir = path.join(__dirname, '../lambda_func');
         const productsTable = Table.fromTableName(this, 'ProductsTableCreate', 'products');
         const stocksTable = Table.fromTableName(this, 'StockTableCreate', 'stocks');
         this.createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
