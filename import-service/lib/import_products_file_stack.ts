@@ -9,12 +9,12 @@ export class ImportProductsFile extends Construct {
     public importProductsFileFn: lambda.Function;
     constructor(stack: Stack, constructId: string) {
         super(stack, constructId);
-        const bucket = s3.Bucket.fromBucketName(this, "Import-service-bucket", "someqa-import-service-bucket");
+        const bucket = s3.Bucket.fromBucketName(this, "Import-service-bucket", process.env.BUCKET_NAME || 'someqa-import-service-bucket');
         const lambdaFuncDir = path.join(__dirname, '../lambda_func');
         this.importProductsFileFn = new lambda.Function(this, 'ImportProductsFileFunction', {
             runtime: lambda.Runtime.NODEJS_20_X,
             code: lambda.Code.fromAsset(lambdaFuncDir),
-            handler: 'import_products_file_lambda.handler',
+            handler: 'importProductsFile.handler',
             environment: {
                 BUCKET_NAME: bucket.bucketName,
             },
