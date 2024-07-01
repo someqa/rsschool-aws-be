@@ -1,5 +1,5 @@
 import { S3Event } from 'aws-lambda';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import csvParser from 'csv-parser';
 import { Readable } from 'stream';
 import { NodeJsClient } from '@smithy/types';
@@ -31,8 +31,27 @@ export const handler = async (event: S3Event) => {
             .on('data', (row) => {
                 console.log('Parsed CSV row:', row);
             })
-            .on('end', () => {
+            .on('end', async () => {
                 console.log(`Finished parsing CSV file: ${objectKey}`);
+                const parsedKey = objectKey.replace('uploaded/', 'parsed/');
+
+
+                const copyObjectCommand = new CopyObjectCommand({
+                    Bucket: bucketName,
+                    CopySource: `${bucketName}/${objectKey}`,
+                    Key: parsedKey,
+                });
+
+                await s3.send(copyObjectCommand);
+
+                const deleteObjectCommand = new DeleteObjectCommand({
+                    Bucket: bucketName,
+                    Key: objectKey,
+                });
+
+                await s3.send(deleteObjectCommand);
+
+                console.log(`Moved file from ${objectKey} to ${parsedKey}`);
             })
             .on('error', (err) => {
                 console.error(`Error parsing CSV file ${objectKey}:`, err);
