@@ -1,8 +1,8 @@
 import { S3Event } from 'aws-lambda';
 import { S3Client, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import csvParser from 'csv-parser';
-import { Readable } from 'stream';
 import { NodeJsClient } from '@smithy/types';
+import { pipeline } from 'stream/promises';
 
 const s3 = new S3Client({}) as NodeJsClient<S3Client>;
 
@@ -27,37 +27,28 @@ export const handler = async (event: S3Event) => {
             throw new Error(`Empty response body for object ${objectKey}`);
         }
 
-        Body.pipe(csvParser())
+        await pipeline(Body, csvParser()
             .on('data', (row) => {
                 console.log('Parsed CSV row:', row);
-            })
-            .on('end', async () => {
-                console.log(`Finished parsing CSV file: ${objectKey}`);
-                const parsedKey = objectKey.replace('uploaded/', 'parsed/');
+            }));
 
+        const parsedKey = objectKey.replace('uploaded/', 'parsed/');
 
-                const copyObjectCommand = new CopyObjectCommand({
-                    Bucket: bucketName,
-                    CopySource: `${bucketName}/${objectKey}`,
-                    Key: parsedKey,
-                });
+        const copyObjectCommand = new CopyObjectCommand({
+            Bucket: bucketName,
+            CopySource: `${bucketName}/${objectKey}`,
+            Key: parsedKey,
+        });
 
-                await s3.send(copyObjectCommand);
+        await s3.send(copyObjectCommand);
+        const deleteObjectCommand = new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: objectKey,
+        });
 
-                const deleteObjectCommand = new DeleteObjectCommand({
-                    Bucket: bucketName,
-                    Key: objectKey,
-                });
-
-                await s3.send(deleteObjectCommand);
-
-                console.log(`Moved file from ${objectKey} to ${parsedKey}`);
-            })
-            .on('error', (err) => {
-                console.error(`Error parsing CSV file ${objectKey}:`, err);
-            });
-
-    } catch (error) {
+        await s3.send(deleteObjectCommand);
+    }
+    catch (error) {
         console.error(`Error fetching object ${objectKey} from S3:`, error);
     }
 };
