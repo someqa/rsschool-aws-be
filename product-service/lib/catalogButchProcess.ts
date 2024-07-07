@@ -4,7 +4,7 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import path from 'path';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, CfnOutput } from 'aws-cdk-lib';
 
 export class CatalogButch extends Construct {
     public catalogBatchProcess: lambda.Function;
@@ -34,5 +34,7 @@ export class CatalogButch extends Construct {
         this.catalogBatchProcess.addEventSource(new SqsEventSource(catalogItemsQueue, {
             batchSize: 5,
         }));
+        new CfnOutput(this, "CatalogQueueArn", { value: catalogItemsQueue.queueArn })
+
     }
 }

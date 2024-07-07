@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "deploy": "npm run build && cdk deploy",
+    "deploy": "npm run build && cdk deploy --outputs-file product-service-data.json --all",
     "bootstrap": "dotenv -e .env -- sh -c 'npm run build && cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION'",
     "seed-data": "bash data/seeding.sh"
   },

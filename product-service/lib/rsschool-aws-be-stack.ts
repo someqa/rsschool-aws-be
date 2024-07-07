@@ -4,6 +4,7 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { GetProducts } from './getProducts';
 import { GetProductsById } from './getProductsById';
 import { CreateProduct } from './createProduct';
+import { CatalogButch } from './catalogButchProcess';
 
 export class RsschoolAwsBeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -54,5 +55,7 @@ export class RsschoolAwsBeStack extends cdk.Stack {
     });
     const productsByIdResource = productsResource.addResource('{productId}');
     productsByIdResource.addMethod('GET', new apigateway.LambdaIntegration(getProductsById));
+
+    new CatalogButch(this, 'CatalogButch');
   }
 }
