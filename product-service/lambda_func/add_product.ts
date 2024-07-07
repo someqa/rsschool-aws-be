@@ -2,6 +2,14 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
 
+type Product = {
+    id: string,
+    title: string,
+    description: string,
+    count: number,
+    price: number
+}
+
 function generateUUIDv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0,
@@ -14,6 +22,41 @@ function validateProductSimply(product: any): boolean {
     return typeof product === 'object' && product.title && product.description && product.price !== undefined && product.count !== undefined;
 }
 
+export async function createProduct(productData: Partial<Product>) {
+    const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
+    const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
+    const newProduct = { ...productData, id: generateUUIDv4() }
+    const db = DynamoDBDocument.from(new DynamoDB());
+    const params = {
+        TransactItems: [
+            {
+                Put: {
+                    TableName: productsTableName,
+                    Item: {
+                        id: newProduct.id,
+                        title: newProduct.title,
+                        description: newProduct.description,
+                        price: newProduct.price
+                    },
+                    ConditionExpression: "attribute_not_exists(id)"
+                }
+            },
+            {
+                Put: {
+                    TableName: stocksTableName,
+                    Item: {
+                        product_id: newProduct.id,
+                        count: newProduct.count
+                    }
+                }
+            }
+        ]
+    };
+    await db.transactWrite(params);
+
+    return newProduct
+}
+
 export async function handler(event: APIGatewayProxyEvent) {
     const headers = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "*" };
     try {
@@ -21,41 +64,12 @@ export async function handler(event: APIGatewayProxyEvent) {
         if (!event.body) {
             return { statusCode: 400, headers, body: 'invalid request, you are missing the parameter body' };
         }
-        if (!validateProductSimply(JSON.parse(event.body))) {
+        const productData = JSON.parse(event.body);
+        if (!validateProductSimply(productData)) {
             return { statusCode: 400, headers, body: 'invalid request, you are missing the parameter body' };
         }
 
-        const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
-        const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
-        const newProduct = JSON.parse(event.body);
-        newProduct.id = generateUUIDv4();
-        const db = DynamoDBDocument.from(new DynamoDB());
-        const params = {
-            TransactItems: [
-                {
-                    Put: {
-                        TableName: productsTableName,
-                        Item: {
-                            id: newProduct.id,
-                            title: newProduct.title,
-                            description: newProduct.description,
-                            price: newProduct.price
-                        },
-                        ConditionExpression: "attribute_not_exists(id)"
-                    }
-                },
-                {
-                    Put: {
-                        TableName: stocksTableName,
-                        Item: {
-                            product_id: newProduct.id,
-                            count: newProduct.count
-                        }
-                    }
-                }
-            ]
-        };
-        await db.transactWrite(params)
+        const newProduct = await createProduct(productData);
         return {
             statusCode: 201, headers,
             body: JSON.stringify({ id: newProduct.id })
