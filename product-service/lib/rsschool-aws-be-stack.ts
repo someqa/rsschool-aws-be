@@ -1,9 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import { GetProducts } from '../product_service/get_products';
-import { GetProductsById } from '../product_service/get_products_by_id';
-import { CreateProduct } from '../product_service/create_product';
+import { GetProducts } from './get_products';
+import { GetProductsById } from './get_products_by_id';
+import { CreateProduct } from './create_product';
 
 export class RsschoolAwsBeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {

@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { handler } from "../product_service/lambda_func/products_by_id";
+import { handler } from "../lambda_func/products_by_id";
 
 describe('Get Products By Id - valid result', () => {
     const params = { pathParameters: { productId: '1234' } } as unknown as APIGatewayProxyEvent
