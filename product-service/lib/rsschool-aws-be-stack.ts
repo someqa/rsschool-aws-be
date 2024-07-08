@@ -6,6 +6,7 @@ import { GetProductsById } from './getProductsById';
 import { CreateProduct } from './createProduct';
 import { CatalogButch } from './catalogButchProcess';
 
+
 export class RsschoolAwsBeStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -57,5 +58,6 @@ export class RsschoolAwsBeStack extends cdk.Stack {
     productsByIdResource.addMethod('GET', new apigateway.LambdaIntegration(getProductsById));
 
     new CatalogButch(this, 'CatalogButch');
+
   }
 }
