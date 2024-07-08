@@ -21,6 +21,16 @@ export class CatalogButch extends Construct {
 
         const emailSubscription = new snsSubscriptions.EmailSubscription('jataji2622@atebin.com');
 
+        const filterPolicy = {
+            category: sns.SubscriptionFilter.numericFilter({
+                greaterThan: 100,
+            }),
+        };
+
+        const filteredEmailSubscription = new snsSubscriptions.EmailSubscription('someqa@atebin.com', {
+            filterPolicy,
+        });
+
         this.catalogBatchProcess = new lambda.Function(this, 'CatalogBatchProcess', {
             runtime: lambda.Runtime.NODEJS_20_X,
             code: lambda.Code.fromAsset(lambdaFuncDir),
@@ -48,6 +58,7 @@ export class CatalogButch extends Construct {
 
 
         createProductTopic.addSubscription(emailSubscription);
+        createProductTopic.addSubscription(filteredEmailSubscription)
         createProductTopic.grantPublish(this.catalogBatchProcess);
     }
 }
