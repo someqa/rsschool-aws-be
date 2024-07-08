@@ -2,7 +2,7 @@ import { createProduct } from "./utils/createProduct";
 import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 
 
-exports.handler = async (event: any) => {
+export async function handler(event: any) {
     const productsTableName = process.env.PRODUCTS_TABLE_NAME || '';
     const stocksTableName = process.env.STOCKS_TABLE_NAME || '';
     const productTopicArn = process.env.PRODUCT_TOPIC_ARN || '';
