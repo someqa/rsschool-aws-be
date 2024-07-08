@@ -25,7 +25,7 @@ export class CatalogButch extends Construct {
 
 
         productsTable.grantReadWriteData(this.catalogBatchProcess);
-
+        stocksTable.grantReadWriteData(this.catalogBatchProcess);
 
         const catalogItemsQueue = new sqs.Queue(this, 'CatalogItemsQueue', {
             visibilityTimeout: Duration.seconds(29),
@@ -34,7 +34,7 @@ export class CatalogButch extends Construct {
         this.catalogBatchProcess.addEventSource(new SqsEventSource(catalogItemsQueue, {
             batchSize: 5,
         }));
-        new CfnOutput(this, "CatalogQueueArn", { value: catalogItemsQueue.queueArn })
-
+        new CfnOutput(this, "CatalogQueueUrlOutput", { value: catalogItemsQueue.queueUrl, exportName: "CatalogQueueUrl" })
+        new CfnOutput(this, "CatalogQueueArnOutput", { value: catalogItemsQueue.queueArn, exportName: "CatalogQueueArn" })
     }
 }
