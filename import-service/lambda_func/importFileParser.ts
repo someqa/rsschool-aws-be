@@ -35,14 +35,12 @@ export const handler = async (event: S3Event) => {
 
         await pipeline(Body, csvParser()
             .on('data', async (row) => {
-                console.log('Parsed CSV row:', row);
                 const messageParams = {
                     QueueUrl: catalogItemsQueueUrl,
                     MessageBody: JSON.stringify(row),
                 };
 
                 const res = await sqs.sendMessage(messageParams);
-                console.log(res);
             }));
 
         const parsedKey = objectKey.replace('uploaded/', 'parsed/');
