@@ -22,7 +22,7 @@ export class CatalogButch extends Construct {
         const emailSubscription = new snsSubscriptions.EmailSubscription('jataji2622@atebin.com');
 
         const filterPolicy = {
-            category: sns.SubscriptionFilter.numericFilter({
+            count: sns.SubscriptionFilter.numericFilter({
                 greaterThan: 100,
             }),
         };
