@@ -60,6 +60,28 @@ export class ImportServiceStack extends cdk.Stack {
       authorizationType: apigateway.AuthorizationType.CUSTOM
     });
 
+    api.addGatewayResponse('UnauthorizedResponse', {
+      type: apigateway.ResponseType.UNAUTHORIZED,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': "'*'", // Adjust as needed
+        'Access-Control-Allow-Methods': "'OPTIONS,POST'",
+      },
+      templates: {
+        'application/json': '{"message": "Unauthorized"}',
+      },
+    });
+
+    api.addGatewayResponse('ForbiddenResponse', {
+      type: apigateway.ResponseType.ACCESS_DENIED,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': "'*'", // Adjust as needed
+        'Access-Control-Allow-Methods': "'OPTIONS,POST'",
+      },
+      templates: {
+        'application/json': '{"message": "Forbidden"}',
+      },
+    });
+
     new ImportFileParser(this, 'ImportFileParser');
   }
 }
