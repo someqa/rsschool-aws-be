@@ -5,7 +5,7 @@ import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 import path from 'path';
 import { Duration, CfnOutput } from 'aws-cdk-lib';
-import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+// import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as sns from 'aws-cdk-lib/aws-sns';
 
 export class CatalogButch extends Construct {
@@ -19,17 +19,17 @@ export class CatalogButch extends Construct {
             displayName: 'Create Product Topic',
         });
 
-        const emailSubscription = new snsSubscriptions.EmailSubscription('jataji2622@atebin.com');
+        // const emailSubscription = new snsSubscriptions.EmailSubscription('jataji2622@atebin.com');
 
-        const filterPolicy = {
-            count: sns.SubscriptionFilter.numericFilter({
-                greaterThan: 100,
-            }),
-        };
+        // const filterPolicy = {
+        //     count: sns.SubscriptionFilter.numericFilter({
+        //         greaterThan: 100,
+        //     }),
+        // };
 
-        const filteredEmailSubscription = new snsSubscriptions.EmailSubscription('someqa@atebin.com', {
-            filterPolicy,
-        });
+        // const filteredEmailSubscription = new snsSubscriptions.EmailSubscription('someqa@atebin.com', {
+        //     filterPolicy,
+        // });
 
         this.catalogBatchProcess = new lambda.Function(this, 'CatalogBatchProcess', {
             runtime: lambda.Runtime.NODEJS_20_X,
@@ -57,8 +57,8 @@ export class CatalogButch extends Construct {
         new CfnOutput(this, "CatalogQueueArnOutput", { value: catalogItemsQueue.queueArn, exportName: "CatalogQueueArn" })
 
 
-        createProductTopic.addSubscription(emailSubscription);
-        createProductTopic.addSubscription(filteredEmailSubscription)
+        // createProductTopic.addSubscription(emailSubscription);
+        // createProductTopic.addSubscription(filteredEmailSubscription)
         createProductTopic.grantPublish(this.catalogBatchProcess);
     }
 }
