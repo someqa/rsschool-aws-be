@@ -3,13 +3,17 @@ import { S3Client, GetObjectCommand, CopyObjectCommand, DeleteObjectCommand } fr
 import csvParser from 'csv-parser';
 import { NodeJsClient } from '@smithy/types';
 import { pipeline } from 'stream/promises';
+import { SQS } from '@aws-sdk/client-sqs';
 
 const s3 = new S3Client({}) as NodeJsClient<S3Client>;
+const sqs = new SQS();
 
 export const handler = async (event: S3Event) => {
     const record = event.Records[0];
     const bucketName = record.s3.bucket.name;
     const objectKey = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
+    const catalogItemsQueueUrl = process.env.SQS_URL;
+
 
     if (!objectKey.startsWith('uploaded/')) {
         console.log(`Skipping object ${objectKey} since it's not in the 'uploaded' folder.`);
@@ -22,14 +26,21 @@ export const handler = async (event: S3Event) => {
     });
 
     try {
+        console.log('QueueUrl:', catalogItemsQueueUrl)
+        if (catalogItemsQueueUrl === undefined) { throw new Error("No SQL Url provided") };
         const { Body } = await s3.send(command);
         if (!Body) {
             throw new Error(`Empty response body for object ${objectKey}`);
         }
 
         await pipeline(Body, csvParser()
-            .on('data', (row) => {
-                console.log('Parsed CSV row:', row);
+            .on('data', async (row) => {
+                const messageParams = {
+                    QueueUrl: catalogItemsQueueUrl,
+                    MessageBody: JSON.stringify(row),
+                };
+
+                const res = await sqs.sendMessage(messageParams);
             }));
 
         const parsedKey = objectKey.replace('uploaded/', 'parsed/');
