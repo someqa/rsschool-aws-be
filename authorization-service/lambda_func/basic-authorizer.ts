@@ -1,5 +1,4 @@
 import { APIGatewayTokenAuthorizerEvent, APIGatewayAuthorizerResult } from './types';
-import 'dotenv/config'
 
 const generatePolicy = (principalId: string, effect: string, resource: string): APIGatewayAuthorizerResult => {
     return {
@@ -18,22 +17,24 @@ const generatePolicy = (principalId: string, effect: string, resource: string): 
 };
 
 export const handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<APIGatewayAuthorizerResult> => {
+
     if (!event.authorizationToken) {
-        throw new Error('Unauthorized');
+        throw new Error('UNAUTHORIZED');
     }
 
     const token = event.authorizationToken.match(/(?<=Basic )(.*)/)?.[0];
     if (!token) {
-        throw new Error('Unauthorized')
+        throw new Error('UNAUTHORIZED')
     }
 
     const [username, password] = Buffer.from(token, 'base64').toString('utf-8').split(':');
 
     const envPassword = process.env[username];
+    console.log(username, password)
 
     if (envPassword && envPassword === password) {
         return generatePolicy(username, 'Allow', event.methodArn);
     } else {
-        throw new Error('Forbidden');
+        return generatePolicy(username, 'Deny', event.methodArn);
     }
 };
