@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { ImportProductsFile } from './import_products_file_stack';
 import { ImportFileParser } from './import_file_parser';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 export class ImportServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -12,6 +13,14 @@ export class ImportServiceStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, 'ImportProductsFileApi', {
       restApiName: 'Import Products Service',
     });
+
+    const basicAuthorizerArn = cdk.Fn.importValue('BasicAuthorizerArn');
+    const authorizer = new apigateway.TokenAuthorizer(this, 'BasicAuthorizer', {
+      handler: lambda.Function.fromFunctionArn(this, 'BasicAuthorizerFunction', basicAuthorizerArn),
+    });
+
+
+
 
     const productsResource = api.root.addResource('import');
     productsResource.addMethod('OPTIONS', new apigateway.MockIntegration({
@@ -46,7 +55,32 @@ export class ImportServiceStack extends cdk.Stack {
         },
       ],
     });
-    productsResource.addMethod('GET', new apigateway.LambdaIntegration(importProductsFile));
+    productsResource.addMethod('GET', new apigateway.LambdaIntegration(importProductsFile), {
+      authorizer,
+      authorizationType: apigateway.AuthorizationType.CUSTOM
+    });
+
+    api.addGatewayResponse('UnauthorizedResponse', {
+      type: apigateway.ResponseType.UNAUTHORIZED,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': "'*'", // Adjust as needed
+        'Access-Control-Allow-Methods': "'OPTIONS,POST'",
+      },
+      templates: {
+        'application/json': '{"message": "Unauthorized"}',
+      },
+    });
+
+    api.addGatewayResponse('ForbiddenResponse', {
+      type: apigateway.ResponseType.ACCESS_DENIED,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': "'*'", // Adjust as needed
+        'Access-Control-Allow-Methods': "'OPTIONS,POST'",
+      },
+      templates: {
+        'application/json': '{"message": "Forbidden"}',
+      },
+    });
 
     new ImportFileParser(this, 'ImportFileParser');
   }

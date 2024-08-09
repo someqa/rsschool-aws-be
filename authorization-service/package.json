@@ -1,0 +1,25 @@
+{
+  "name": "authorization-service",
+  "version": "0.1.0",
+  "bin": {
+    "rsschool-aws-be": "bin/authorization-service-app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "deploy": "npm run build && cdk deploy",
+    "bootstrap": "dotenv -e .env -- sh -c 'npm run build && cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION'"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "~5.4.5"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.145.0",
+    "constructs": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.2",
+    "source-map-support": "^0.5.21"
+  }
+}
