@@ -1,9 +1,11 @@
 import http from 'http';
 import https from 'https';
 import { URL } from 'url';
+import NodeCache from 'node-cache';
 import 'dotenv/config';
 
 const PORT = process.env.PORT || 3000;
+const cache = new NodeCache({ stdTTL: 120 });
 
 // Mapping from env vars
 const serviceMap = {
@@ -25,7 +27,6 @@ const requestHandler = async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     res.setHeader('Connection', 'Keep-Alive');
 
 
@@ -44,6 +45,17 @@ const requestHandler = async (req, res) => {
 
 
     const targetPath = rest.join('/');
+
+    if (serviceName === 'product' && targetPath === 'products' && req.method === 'GET') {
+        // Check cache for a stored response
+        const cachedResponse = cache.get('productsList');
+        if (cachedResponse) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(cachedResponse);
+            return;
+        }
+    }
 
     try {
         const method = req.method;
@@ -64,7 +76,9 @@ const requestHandler = async (req, res) => {
                 });
 
                 const data = await response.json();
-
+                if (serviceName === 'product' && targetPath === 'products' && req.method === 'GET') {
+                    cache.set('productsList', JSON.stringify(data));
+                }
                 res.statusCode = response.status;
                 res.end(JSON.stringify(data));
             } catch (error) {
