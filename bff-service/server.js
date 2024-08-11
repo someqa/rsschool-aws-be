@@ -22,6 +22,12 @@ const requestHandler = async (req, res) => {
     const [, serviceName, ...rest] = parsedUrl.pathname.split('/');
 
     const recipientURL = serviceMap[serviceName];
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    res.setHeader('Connection', 'Keep-Alive');
+
 
     if (!recipientURL) {
         res.statusCode = 502;
@@ -29,6 +35,13 @@ const requestHandler = async (req, res) => {
         res.end(JSON.stringify({ error: "Cannot process request: Unknown service" }));
         return;
     }
+
+    if (req.method === 'OPTIONS') {
+        res.statusCode = 204;
+        res.end();
+        return;
+    }
+
 
     const targetPath = rest.join('/');
 
@@ -53,7 +66,6 @@ const requestHandler = async (req, res) => {
                 const data = await response.json();
 
                 res.statusCode = response.status;
-                res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify(data));
             } catch (error) {
                 res.statusCode = 502;
@@ -63,7 +75,6 @@ const requestHandler = async (req, res) => {
         });
     } catch (error) {
         res.statusCode = 500;
-        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ error: `Server error: ${error.message}` }));
     }
 };
